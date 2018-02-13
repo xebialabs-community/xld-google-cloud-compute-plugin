@@ -1,1 +1,8 @@
+xl-deploy-7.6.0-server
+build
+out
+.gradle
 .idea
+*.iml
+*.ipr
+*.iws

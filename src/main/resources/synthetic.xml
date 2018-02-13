@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2018 XEBIALABS
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+<synthetic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns="http://www.xebialabs.com/deployit/synthetic"
+           xsi:schemaLocation="http://www.xebialabs.com/deployit/synthetic synthetic.xsd">
+
+    <type type="google.AccountCloud" extends="udm.BaseContainer" description="Google account." root="INFRASTRUCTURE">
+        <property name="clientEmail"/>
+        <property name="privateKey" size="large"/>
+
+        <method name="checkConnection" label="Check Connection" description="Verify the connection to the Google cloud."
+                delegate="jythonScript" script="google/cloud/compute/instance/check_connection.py"/>
+        <method name="importFromJson" label="Import from JSON "
+                description="set the properties based on the content of the json."
+                delegate="jythonScript" script="google/cloud/compute/instance/import_from_json.py">
+            <parameters>
+                <parameter name="json" label="JSON" description="paste the content of the json file"
+                           size="large"/>
+            </parameters>
+        </method>
+
+    </type>
+
+
+    <type type="googlecloud.compute.Instance" extends="udm.BaseProvisioned"
+          deployable-type="googlecloud.compute.InstanceSpec"
+          container-type="google.AccountCloud" description="Google Cloud Compute instance.">
+        <generate-deployable type="googlecloud.compute.InstanceSpec" extends="udm.BaseProvisionable"
+                             copy-default-values="true"
+                             description="Specification for an Google Cloud Compute instance"/>
+        <property name="instanceName" kind="string" description="Name of instance." required="false"/>
+
+        <property name="zone" kind="string" required="true" default="europe-west1-b" description="Google zone to use."/>
+        <property name="machine" kind="string" required="true" default="n1-standard-1"
+                  description="Google machine to use."/>
+        <property name="image" kind="string" required="true" default="ubuntu-1710" description="Google image to use."/>
+
+        <property name="waitOnCreate" kind="integer" required="true" default="60" description="in seconds"
+                  category="Other"/>
+        <property name="waitOnDestroy" kind="integer" required="true" default="10" description="in seconds"
+                  category="Other"/>
+
+
+        <property name="operationSelfLink" kind="string" required="false" category="Output"/>
+        <property name="instanceId" kind="string" required="false" category="Output"/>
+        <property name="publicIp" kind="string" required="false" category="Output"/>
+    </type>
+</synthetic>
