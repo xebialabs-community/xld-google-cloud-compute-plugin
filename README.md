@@ -1,135 +1,53 @@
-== SSH
+# XL Deploy Google Cloud Compute plugin
 
-ssh-keygen -t rsa -f ~/.ssh/xld-google-cloud-compute -C root
+[![Build Status][xld-google-cloud-compute-plugin-travis-image] ][xld-google-cloud-compute-plugin-travis-url]
+[![Codacy Badge][xld-google-cloud-compute-plugin-codacy-image] ][xld-google-cloud-compute-plugin-codacy-url]
+[![Code Climate][xld-google-cloud-compute-plugin-code-climate-image] ][xld-google-cloud-compute-plugin-code-climate-url]
+[![License: MIT][xld-google-cloud-compute-plugin-license-image] ][xld-google-cloud-compute-plugin-license-url]
+[![Github All Releases][xld-google-cloud-compute-plugin-downloads-image] ]()
 
-== GGC
+[xld-google-cloud-compute-plugin-travis-image]: https://travis-ci.org/xebialabs-community/xld-google-cloud-compute-plugin.svg?branch=master
+[xld-google-cloud-compute-plugin-travis-url]: https://travis-ci.org/xebialabs-community/xld-google-cloud-compute-plugin
+[xld-google-cloud-compute-plugin-codacy-image]: https://api.codacy.com/project/badge/Grade/db7f22096a014ff0974def7351b21d73    
+[xld-google-cloud-compute-plugin-codacy-url]: https://www.codacy.com/app/ltutar/xld-google-cloud-compute-plugin
+[xld-google-cloud-compute-plugin-code-climate-image]: https://codeclimate.com/github/ltutar/xld-google-cloud-compute-plugin/badges/gpa.svg
+[xld-google-cloud-compute-plugin-code-climate-url]: https://codeclimate.com/github/ltutar/xld-google-cloud-compute-plugin
+[xld-google-cloud-compute-plugin-license-image]: https://img.shields.io/badge/License-MIT-yellow.svg
+[xld-google-cloud-compute-plugin-license-url]: https://opensource.org/licenses/MIT
+[xld-google-cloud-compute-plugin-downloads-image]: https://img.shields.io/github/downloads/xebialabs-community/xld-google-cloud-compute-plugin/total.svg
 
-zone: europe-west1-b
-service account: "email": "929779550645-compute@developer.gserviceaccount.com",
+## Preface
+
+This document describes the functionality provided by the Google Cloud Compute plugin
+
+See the [XL Deploy reference manual](https://docs.xebialabs.com/xl-deploy) for background information on XL Deploy and deployment automation concepts.  
+
+## Overview
+
+The plugin is a XL Deploy plugin that adds capability for provision instance into Google Cloud.
+
+## Requirements
+
+* **Requirements**
+	* **XL Deploy** 7.0.1+
+
+## Installation
+
+* Copy the latest JAR file from the [releases page](https://github.com/xebialabs-community/xld-google-cloud-compute-plugin/releases) into the `XL_DEPLOY_SERVER/plugins` directory.
+* Restart the XL Deploy server.
 
 
-gcloud auth login   
-gcloud config set project just-terminus-194507
+## Usage
 
-pip3 install google-api-python-client google-auth-httplib2
+1. Go to `Repository - Infrastructure`, create a new `google.AccountCloud` and fill in the properties. You may use the 'Import JSON Control task to help you'
+2. Use the 'Check Connection' Control task to valide the parameters.
+3. Create an environment under `Repository - Environments` and add the corresponding `google.AccountCloud` as container.
 
-metadata vs tag vs labels
+## Deployables ##
 
+The plugin supports one deployable:
 
-POST https://www.googleapis.com/compute/v1/projects/just-terminus-194507/zones/europe-west1-b/instances
-{
-  "name": "instance-1",
-  "zone": "projects/just-terminus-194507/zones/europe-west1-b",
-  "minCpuPlatform": "Automatic",
-  "machineType": "projects/just-terminus-194507/zones/europe-west1-b/machineTypes/custom-1-2048",
-  "metadata": {
-    "items": [
-      {
-        "key": "metadata_1",
-        "value": "value_of_metadata_1"
-      },
-      {
-        "key": "startup-script",
-        "value": "echo \"benoit\" > /tmp/benoit.txt"
-      }
-    ]
-  },
-  "tags": {
-    "items": [
-      "http-server",
-      "https-server"
-    ]
-  },
-  "disks": [
-    {
-      "type": "PERSISTENT",
-      "boot": true,
-      "mode": "READ_WRITE",
-      "autoDelete": true,
-      "deviceName": "instance-1",
-      "initializeParams": {
-        "sourceImage": "projects/ubuntu-os-cloud/global/images/ubuntu-1710-artful-v20180126",
-        "diskType": "projects/just-terminus-194507/zones/europe-west1-b/diskTypes/pd-standard",
-        "diskSizeGb": "10"
-      }
-    }
-  ],
-  "canIpForward": false,
-  "networkInterfaces": [
-    {
-      "subnetwork": "projects/just-terminus-194507/regions/europe-west1/subnetworks/default",
-      "accessConfigs": [
-        {
-          "name": "External NAT",
-          "type": "ONE_TO_ONE_NAT"
-        }
-      ],
-      "aliasIpRanges": []
-    }
-  ],
-  "description": "",
-  "labels": {
-    "nom": "moussaud"
-  },
-  "scheduling": {
-    "preemptible": false,
-    "onHostMaintenance": "MIGRATE",
-    "automaticRestart": true
-  },
-  "deletionProtection": false,
-  "serviceAccounts": [
-    {
-      "email": "929779550645-compute@developer.gserviceaccount.com",
-      "scopes": [
-        "https://www.googleapis.com/auth/devstorage.read_only",
-        "https://www.googleapis.com/auth/logging.write",
-        "https://www.googleapis.com/auth/monitoring.write",
-        "https://www.googleapis.com/auth/servicecontrol",
-        "https://www.googleapis.com/auth/service.management.readonly",
-        "https://www.googleapis.com/auth/trace.append"
-      ]
-    }
-  ]
-}
+1. Create an provisioning package `udm.ProvisioningPackage` with `googlecloud.compute.InstanceSpec` as deployables. 
+2. Add templates https://docs.xebialabs.com/xl-deploy/how-to/use-provisioning-outputs.html
+3. Start deploying.
 
-POST https://www.googleapis.com/compute/v1/projects/just-terminus-194507/global/firewalls
-{
-  "name": "default-allow-http",
-  "kind": "compute#firewall",
-  "sourceRanges": [
-    "0.0.0.0/0"
-  ],
-  "targetTags": [
-    "http-server"
-  ],
-  "allowed": [
-    {
-      "IPProtocol": "tcp",
-      "ports": [
-        "80"
-      ]
-    }
-  ],
-  "network": "projects/just-terminus-194507/global/networks/default"
-}
-
-POST https://www.googleapis.com/compute/v1/projects/just-terminus-194507/global/firewalls
-{
-  "name": "default-allow-https",
-  "kind": "compute#firewall",
-  "sourceRanges": [
-    "0.0.0.0/0"
-  ],
-  "targetTags": [
-    "https-server"
-  ],
-  "allowed": [
-    {
-      "IPProtocol": "tcp",
-      "ports": [
-        "443"
-      ]
-    }
-  ],
-  "network": "projects/just-terminus-194507/global/networks/default"
-}
