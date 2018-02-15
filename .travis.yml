@@ -5,7 +5,7 @@ deploy:
   provider: releases
   api_key:
     secure: SA376NVGbSgynrxP1pmSKCsd5/N9SXL5mcGJGnh/WR9ZcU5xsXLqItAydetTRjR255QmCLl1rWkxMNlmxS5j2Qkwmpl+Rx3X5Jz3vWKRyPdqds8IGra2sWvPCld63Dvl7m/DL6YiV6fJTwMXTO1AXtwGLY7xPS5KuDX6BFeuGP054cfcTiA9uL7Glb/jh0h+GqXx/6TsXJLT4ogEJjpP0UQBLaUU6KMnpHV5hvFRWhZUs/f6lsyqaEcx2rPz5+3oSVkK2t1eRpVd6MVDO/eGxINnAH4VydVJVaqY6XyZ18VJ0UUTYssP0Ftr3OepSWFSpWbSe5aHkbGUnVbqt1WTsBZmP9XThYmY8IM/iG4/axCoK3FDHNMHbIXtkPMybS6PVJJB/ujgaoNw0huQM3Yyn6BZ6BGzP7hl0va/MvVnN9lHLJdKfrmv2gCDlZ1H1Ftk5Zr7X6pzXHxD83QqAevQuXuxkQE5ndh8oYxVG2cPelcbxrRN/GxSS43Zcvf9IoPF9ZxRyKIrvcPOzcIXCGOYNY7te7jCjgVZvc2fHw5ha3ZesBhfJ6nzJTtfBQHu3Da8e1mSTOUK+13S/ciua9uL4kNlbaIAwZlAqOAUdVvgaJA0pxlpbv/kS4R1XAVUD+3HUgtT5tlFNcAyObsVBgZ8yHA6G/+pED3Saxfa7W/oC4w=
-  file: "build//distributions/xld-google-cloud-compute-plugin-*.xldp"
+  file: "build/distributions/xld-google-cloud-compute-plugin-*.xldp"
   skip_cleanup: true
   on:
     repo: xebialabs-community/xld-google-cloud-compute-plugin

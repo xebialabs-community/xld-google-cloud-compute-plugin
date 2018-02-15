@@ -1,5 +1,4 @@
 # XL Deploy Google Cloud Compute plugin
-
 [![Build Status][xld-google-cloud-compute-plugin-travis-image] ][xld-google-cloud-compute-plugin-travis-url]
 [![Codacy Badge][xld-google-cloud-compute-plugin-codacy-image] ][xld-google-cloud-compute-plugin-codacy-url]
 [![Code Climate][xld-google-cloud-compute-plugin-code-climate-image] ][xld-google-cloud-compute-plugin-code-climate-url]
@@ -15,6 +14,8 @@
 [xld-google-cloud-compute-plugin-license-image]: https://img.shields.io/badge/License-MIT-yellow.svg
 [xld-google-cloud-compute-plugin-license-url]: https://opensource.org/licenses/MIT
 [xld-google-cloud-compute-plugin-downloads-image]: https://img.shields.io/github/downloads/xebialabs-community/xld-google-cloud-compute-plugin/total.svg
+
+![Google Compute](images/gcc.png)
 
 ## Preface
 
@@ -49,5 +50,5 @@ The plugin supports one deployable:
 
 1. Create an provisioning package `udm.ProvisioningPackage` with `googlecloud.compute.InstanceSpec` as deployables. 
 2. Add templates https://docs.xebialabs.com/xl-deploy/how-to/use-provisioning-outputs.html
-3. Start deploying.
+3   . Start deploying.
 
