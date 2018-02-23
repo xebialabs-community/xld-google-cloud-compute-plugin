@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableList;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.jclouds.googlecomputeengine.domain.NewInstance.create;
@@ -58,6 +59,11 @@ public class GCPBuilder {
 
     public GCPBuilder metadata(Metadata metadata) {
         this.metadata = metadata;
+        return this;
+    }
+
+    public GCPBuilder metadata(Map<String, String> metadata) {
+        this.metadata = Metadata.create().putAll(metadata);
         return this;
     }
 

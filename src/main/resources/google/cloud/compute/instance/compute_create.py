@@ -18,9 +18,10 @@ zone = deployed.zone
 image = deployed.image
 imageProject = deployed.imageProject
 externalAddress = deployed.externalAddress
+metadata = deployed.metadata
 
 instanceName = deployed.instanceName if deployed.instanceName else deployed.name
 
 print("Create new instance {} ...".format(instanceName))
-operationSelfLink = googleCompute.createInstance(instanceName, image, imageProject, machine, zone, externalAddress)
+operationSelfLink = googleCompute.createInstance(instanceName, image, imageProject, machine, zone, externalAddress, metadata)
 deployed.operationSelfLink = operationSelfLink

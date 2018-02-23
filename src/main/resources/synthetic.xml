@@ -46,6 +46,7 @@
         <property name="imageProject" kind="string" required="true" default="ubuntu-os-cloud" description="Google Project where the image is stored."/>
         <property name="image" kind="string" required="true" default="ubuntu-1710" description="Google image to use."/>
         <property name="externalAddress" kind="string" required="false"  description="External IP address defined in VPC network"/>
+        <property name="metadata" kind="map_string_string" required="false" description="compute metadata"/>
 
         <property name="waitOnCreate" kind="integer" required="true" default="60" description="in seconds"
                   category="Other"/>

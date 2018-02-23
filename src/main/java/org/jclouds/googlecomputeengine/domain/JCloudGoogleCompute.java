@@ -71,7 +71,7 @@ public class JCloudGoogleCompute {
         return o.selfLink().toString();
     }
 
-    public String createInstance(String instanceName, String imageName, String imageProject, String machine, String zone, String externalAddress) {
+    public String createInstance(String instanceName, String imageName, String imageProject, String machine, String zone, String externalAddress, Map<String,String> metadata) {
         URI machineTypeURL = googleApi.machineTypesInZone(zone).get(machine).selfLink();
         System.out.println("machineTypeURL = " + machineTypeURL);
 
@@ -101,7 +101,7 @@ public class JCloudGoogleCompute {
 
 
         GCPBuilder gcpBuilder = new GCPBuilder(instanceName, machineTypeURL, networkURL, Arrays.asList(accessConfig), image.selfLink());
-        NewInstance newInstance = gcpBuilder.build();
+        NewInstance newInstance = gcpBuilder.metadata(metadata).build();
 
         Operation o = getInstanceApi(zone).create(newInstance);
         return o.selfLink().toString();

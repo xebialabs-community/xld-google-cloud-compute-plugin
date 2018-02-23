@@ -10,6 +10,7 @@
 package org.xebialabs.community.googlecloud;
 
 
+import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -17,6 +18,7 @@ import org.jclouds.googlecomputeengine.domain.Instance;
 import org.jclouds.googlecomputeengine.domain.JCloudGoogleCompute;
 
 import java.io.File;
+import java.util.Map;
 
 import static com.google.common.base.Charsets.UTF_8;
 
@@ -28,7 +30,7 @@ public class JCloudGoogleComputeTest {
         String project = "just-terminus-194507";
         String zone = "europe-west1-b";
 
-        String instanceName = "simple-instance-3";
+        String instanceName = "simple-instance-4";
         String imageName = "ubuntu-1710";
         String selfLinkCreate = "";
 
@@ -39,10 +41,12 @@ public class JCloudGoogleComputeTest {
         String private_key = json.get("private_key").toString().replace("\"", "").replace("\\n", "\n");
         System.out.println("private_key = " + private_key);
         System.out.println("client_email = " + client_email);
-        String externalAddress = "vm-1";
+        String externalAddress = ""; //"vm-1";
+        Map<String, String> metadata = Maps.newHashMap();
+        metadata.put("startup-script-url", "gs://ci-scripts/start-vm.sh");
         {
             JCloudGoogleCompute googleCompute = new JCloudGoogleCompute(client_email, private_key);
-            selfLinkCreate = googleCompute.createInstance(instanceName, imageName, "ubuntu-os-cloud", machine, zone, externalAddress);
+            selfLinkCreate = googleCompute.createInstance(instanceName, imageName, "ubuntu-os-cloud", machine, zone, externalAddress, metadata);
         }
         {
             JCloudGoogleCompute googleCompute = new JCloudGoogleCompute(json_file_path);
