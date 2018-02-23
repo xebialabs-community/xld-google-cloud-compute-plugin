@@ -1,20 +1,22 @@
 /**
  * Copyright 2018 XEBIALABS
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package org.xebialabs.community.googlecloud;
+package org.jclouds.googlecomputeengine.domain;
+//org.jclouds.googlecomputeengine.domain
 
+import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import org.jclouds.ContextBuilder;
-import org.jclouds.compute.ComputeServiceContext;
 
 import org.jclouds.domain.Credentials;
 import org.jclouds.googlecloud.GoogleCredentialsFromJson;
@@ -25,11 +27,9 @@ import org.jclouds.googlecomputeengine.domain.*;
 
 
 import org.jclouds.googlecomputeengine.domain.Image;
+import org.jclouds.googlecomputeengine.features.AddressApi;
 import org.jclouds.googlecomputeengine.features.InstanceApi;
 import org.jclouds.googlecomputeengine.options.ListOptions;
-import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
-import org.jclouds.sshj.config.SshjSshClientModule;
-import com.google.inject.Module;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.base.Charsets.UTF_8;
@@ -38,12 +38,9 @@ import static com.google.common.base.Charsets.UTF_8;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.security.GeneralSecurityException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
-import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_SCRIPT_COMPLETE;
 import static org.jclouds.compute.options.TemplateOptions.Builder.runScript;
 import static org.jclouds.googlecomputeengine.options.ListOptions.Builder.filter;
 
@@ -74,32 +71,58 @@ public class JCloudGoogleCompute {
         return o.selfLink().toString();
     }
 
-    public String createInstance(String instanceName, String imageName, String imageProject, String machine, String zone) {
+    public String createInstance(String instanceName, String imageName, String imageProject, String machine, String zone, String externalAddress) {
         URI machineTypeURL = googleApi.machineTypesInZone(zone).get(machine).selfLink();
         System.out.println("machineTypeURL = " + machineTypeURL);
 
         Image image = searchImage(imageName, imageProject);
         System.out.println("image = " + image);
 
-        URI networkURL = googleApi.networks().get("default").selfLink();
+        Instance.NetworkInterface.AccessConfig accessConfig = getDefaultAccessConfig();
+        if (!Strings.isNullOrEmpty(externalAddress)) {
+            Region region = getRegion(zone);
+            System.out.println("region = " + region);
+            AddressApi addressApi = googleApi.addressesInRegion(region.name());
+            Address address = addressApi.get(externalAddress);
+            System.out.println("address = " + address);
+            String ip = address.address();
+            System.out.println("ip = " + ip);
+            Instance.NetworkInterface.AccessConfig external_nat = Instance.NetworkInterface.AccessConfig.create("External NAT", Instance.NetworkInterface.AccessConfig.Type.ONE_TO_ONE_NAT, ip);
+            accessConfig = external_nat;
+        }
+        System.out.println("accessConfig = " + accessConfig);
+
+        Network aDefault = googleApi.networks().get("default");
+        URI networkURL = aDefault.selfLink();
         if (networkURL == null) {
             throw new RuntimeException("Your project does not have a default network. Please recreate the default network or try again with a new project");
         }
         System.out.println("networkURL = " + networkURL);
 
 
-        NewInstance newInstance = NewInstance.create(
-            instanceName, // name
-            machineTypeURL, // machineType
-            networkURL, // network
-            image.selfLink());
-        System.out.println("newInstance = " + newInstance);
+        GCPBuilder gcpBuilder = new GCPBuilder(instanceName, machineTypeURL, networkURL, Arrays.asList(accessConfig), image.selfLink());
+        NewInstance newInstance = gcpBuilder.build();
 
         Operation o = getInstanceApi(zone).create(newInstance);
-
-        System.out.println("o = " + o);
-
         return o.selfLink().toString();
+    }
+
+    private Instance.NetworkInterface.AccessConfig getDefaultAccessConfig() {
+        return Instance.NetworkInterface.AccessConfig.create(null, Instance.NetworkInterface.AccessConfig.Type.ONE_TO_ONE_NAT, null);
+    }
+
+    private Region getRegion(String zone) {
+        Iterator<ListPage<Region>> list = googleApi.regions().list();
+        while (list.hasNext()) {
+            ListPage<Region> next = list.next();
+            for (Region region : next) {
+                if (zone.startsWith(region.name())) {
+                    return region;
+                }
+            }
+
+        }
+        throw new RuntimeException("Region not found zone=" + zone);
     }
 
     private Image searchImage(String imageName, String imageProject) {

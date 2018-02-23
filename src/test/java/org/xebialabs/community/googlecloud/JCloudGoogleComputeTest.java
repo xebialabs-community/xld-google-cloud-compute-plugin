@@ -1,10 +1,10 @@
 /**
  * Copyright 2018 XEBIALABS
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package org.xebialabs.community.googlecloud;
@@ -14,6 +14,7 @@ import com.google.common.io.Files;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.jclouds.googlecomputeengine.domain.Instance;
+import org.jclouds.googlecomputeengine.domain.JCloudGoogleCompute;
 
 import java.io.File;
 
@@ -27,7 +28,7 @@ public class JCloudGoogleComputeTest {
         String project = "just-terminus-194507";
         String zone = "europe-west1-b";
 
-        String instanceName = "simple-instance-2";
+        String instanceName = "simple-instance-3";
         String imageName = "ubuntu-1710";
         String selfLinkCreate = "";
 
@@ -38,9 +39,10 @@ public class JCloudGoogleComputeTest {
         String private_key = json.get("private_key").toString().replace("\"", "").replace("\\n", "\n");
         System.out.println("private_key = " + private_key);
         System.out.println("client_email = " + client_email);
+        String externalAddress = "vm-1";
         {
             JCloudGoogleCompute googleCompute = new JCloudGoogleCompute(client_email, private_key);
-            selfLinkCreate = googleCompute.createInstance(instanceName, imageName, "ubuntu-os-cloud", machine, zone);
+            selfLinkCreate = googleCompute.createInstance(instanceName, imageName, "ubuntu-os-cloud", machine, zone, externalAddress);
         }
         {
             JCloudGoogleCompute googleCompute = new JCloudGoogleCompute(json_file_path);
