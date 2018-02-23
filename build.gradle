@@ -34,7 +34,7 @@ dependencies {
 }
 
 
-version = "1.0.0"
+version = "1.0.2"
 
 // sourceCompatibility = 1.7
 // targetCompatibility = 1.7
