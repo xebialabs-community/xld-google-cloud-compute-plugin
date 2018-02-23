@@ -40,7 +40,7 @@ public class JCloudGoogleComputeTest {
         System.out.println("client_email = " + client_email);
         {
             JCloudGoogleCompute googleCompute = new JCloudGoogleCompute(client_email, private_key);
-            selfLinkCreate = googleCompute.createInstance(instanceName, imageName, machine, zone);
+            selfLinkCreate = googleCompute.createInstance(instanceName, imageName, "ubuntu-os-cloud", machine, zone);
         }
         {
             JCloudGoogleCompute googleCompute = new JCloudGoogleCompute(json_file_path);

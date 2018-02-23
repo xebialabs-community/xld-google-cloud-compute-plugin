@@ -74,11 +74,11 @@ public class JCloudGoogleCompute {
         return o.selfLink().toString();
     }
 
-    public String createInstance(String instanceName, String imageName, String machine, String zone) {
+    public String createInstance(String instanceName, String imageName, String imageProject, String machine, String zone) {
         URI machineTypeURL = googleApi.machineTypesInZone(zone).get(machine).selfLink();
         System.out.println("machineTypeURL = " + machineTypeURL);
 
-        Image image = searchImage(imageName);
+        Image image = searchImage(imageName, imageProject);
         System.out.println("image = " + image);
 
         URI networkURL = googleApi.networks().get("default").selfLink();
@@ -89,10 +89,10 @@ public class JCloudGoogleCompute {
 
 
         NewInstance newInstance = NewInstance.create(
-                instanceName, // name
-                machineTypeURL, // machineType
-                networkURL, // network
-                image.selfLink());
+            instanceName, // name
+            machineTypeURL, // machineType
+            networkURL, // network
+            image.selfLink());
         System.out.println("newInstance = " + newInstance);
 
         Operation o = getInstanceApi(zone).create(newInstance);
@@ -102,9 +102,10 @@ public class JCloudGoogleCompute {
         return o.selfLink().toString();
     }
 
-    private Image searchImage(String imageName) {
+    private Image searchImage(String imageName, String imageProject) {
+        System.out.println("JCloudGoogleCompute.searchImage " + imageName + "," + imageProject);
         ListOptions filter = filter(String.format("name eq %s.*", imageName));
-        List<Image> list = googleApi.images().listInProject("ubuntu-os-cloud", filter).next();
+        List<Image> list = googleApi.images().listInProject(imageProject, filter).next();
         List<Image> result = new ArrayList<>();
         for (Image image : list) {
             if (image.deprecated() == null) {
@@ -132,7 +133,7 @@ public class JCloudGoogleCompute {
 
     private static GoogleComputeEngineApi createGoogleComputeEngineApi(String identity, String credential) {
         ContextBuilder contextBuilder = ContextBuilder.newBuilder(GoogleComputeEngineProviderMetadata.builder().build())
-                .credentials(identity, credential);
+            .credentials(identity, credential);
         Injector injector = contextBuilder.buildInjector();
         return injector.getInstance(GoogleComputeEngineApi.class);
     }

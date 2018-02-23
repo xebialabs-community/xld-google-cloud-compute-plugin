@@ -16,9 +16,10 @@ googleCompute = JCloudGoogleCompute(deployed.container.clientEmail, deployed.con
 machine = deployed.machine
 zone = deployed.zone
 image = deployed.image
+imageProject = deployed.imageProject
 
 instanceName = deployed.instanceName if deployed.instanceName else deployed.name
 
 print("Create new instance {} ...".format(instanceName))
-operationSelfLink = googleCompute.createInstance(instanceName, image, machine, zone)
+operationSelfLink = googleCompute.createInstance(instanceName, image, imageProject, machine, zone)
 deployed.operationSelfLink = operationSelfLink
