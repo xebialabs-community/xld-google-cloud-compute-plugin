@@ -15,11 +15,9 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.jclouds.googlecomputeengine.domain.Instance;
-import org.jclouds.googlecomputeengine.domain.JCloudGoogleCompute;
-import sun.awt.windows.ThemeReader;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 import static com.google.common.base.Charsets.UTF_8;
@@ -55,7 +53,9 @@ public class JCloudGoogleComputeTest {
         }
         {
             GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
-            googleCompute.waitForOperation(selfLinkCreate, zone);
+            //googleCompute.waitForOperation(selfLinkCreate, zone);
+            System.out.println("Wait for Create....");
+            waitFor(zone, instanceName, googleCompute, selfLinkCreate);
             System.out.println("Created " + instanceName);
         }
         {
@@ -73,23 +73,25 @@ public class JCloudGoogleComputeTest {
         {
             GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
             String selfLinkDelete = googleCompute.deleteInstance(instanceName, zone);
-            long start = System.currentTimeMillis();
-            while (!googleCompute.isOperationDone(selfLinkDelete, zone)) {
-                Thread.sleep(1000 * 5);
-                System.out.println("waiting...");
-                //Operation operation = googleCompute.getOperation(selfLinkDelete, zone);
-                //System.out.println("operation = " + operation);
-            }
-            long stop = System.currentTimeMillis();
-            System.out.println("Deleted " + instanceName);
-            long delta = (stop - start) / 1000;
-            System.out.println("delta = " + delta);
-            Operation operation = googleCompute.getOperation(selfLinkDelete, zone);
-            System.out.println("operation.getInsertTime() = " + operation.getInsertTime());
-            System.out.println("operation.getStartTime() = " + operation.getStartTime());
-            System.out.println("operation.getEndTime() = " + operation.getEndTime());
+            System.out.println("Wait for Delete....");
+            waitFor(zone, instanceName, googleCompute, selfLinkDelete);
         }
         System.out.println(" DONE !");
+    }
+
+    public static void waitFor(String zone, String instanceName, GoogleCloudCompute googleCompute, String selfLinkDelete) throws IOException, InterruptedException {
+        long start = System.currentTimeMillis();
+        while (!googleCompute.isOperationDone(selfLinkDelete, zone)) {
+            Thread.sleep(1000 * 5);
+        }
+        long stop = System.currentTimeMillis();
+        System.out.println("Deleted " + instanceName);
+        long delta = (stop - start) / 1000;
+        System.out.println("delta = " + delta + " seconds");
+        Operation operation = googleCompute.getOperation(selfLinkDelete, zone);
+        System.out.println("operation.getInsertTime() = " + operation.getInsertTime());
+        System.out.println("operation.getStartTime()  = " + operation.getStartTime());
+        System.out.println("operation.getEndTime()    = " + operation.getEndTime());
     }
 
 }
