@@ -352,7 +352,6 @@ public class GoogleCloudCompute {
             for (Instance instance : instances) {
                 instanceNames.add(instance.getName());
             }
-
         }
         return instanceNames;
 
