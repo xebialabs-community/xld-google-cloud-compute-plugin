@@ -15,6 +15,7 @@
            xsi:schemaLocation="http://www.xebialabs.com/deployit/synthetic synthetic.xsd">
 
     <type type="google.AccountCloud" extends="udm.BaseContainer" description="Google account." root="INFRASTRUCTURE">
+        <property name="projectId" />
         <property name="clientEmail"/>
         <property name="privateKey" size="large"/>
 

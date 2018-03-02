@@ -8,17 +8,17 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-from org.jclouds.googlecomputeengine.domain import JCloudGoogleCompute
+from org.xebialabs.community.googlecloud  import CloudGoogleCompute
 
-googleCompute = JCloudGoogleCompute(deployed.container.clientEmail, deployed.container.privateKey)
+googleCompute = CloudGoogleCompute(deployed.container.clientEmail, deployed.container.privateKey, deployed.container.projectId)
 
 instanceName = deployed.instanceName if deployed.instanceName else deployed.name
-print("Wait for a new instance {} ...".format(instanceName))
+zone = deployed.zone
 
-if not googleCompute.isOperationDone(deployed.operationSelfLink):
+print("Wait for a new instance {} in {} ...".format(instanceName, zone))
+if not googleCompute.isOperationDone(deployed.operationSelfLink, zone):
     result = "RETRY"
 else:
-    zone = deployed.zone
     instance = googleCompute.getInstanceByName(instanceName, zone)
     print("instance is {0}".format(instance))
     deployed.instanceId = instance.selfLink().toString()

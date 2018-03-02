@@ -8,14 +8,16 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-from org.jclouds.googlecomputeengine.domain import JCloudGoogleCompute
+from org.xebialabs.community.googlecloud import CloudGoogleCompute
 
-googleCompute = JCloudGoogleCompute(previousDeployed.container.clientEmail, previousDeployed.container.privateKey)
-instanceName = previousDeployed.instanceName if previousDeployed.instanceName else previousDeployed.name
+googleCompute = CloudGoogleCompute(previousDeployed.container.clientEmail, previousDeployed.container.privateKey,
+                                   previousDeployed.container.projectId)
 
-print("Wait for the end of {} ...".format(instanceName))
+zone = previousDeployed.zone
 
-if not googleCompute.isOperationDone(previousDeployed.operationSelfLink):
+print("Wait for the end of {} {}...".format(instanceName, zone))
+
+if not googleCompute.isOperationDone(previousDeployed.operationSelfLink, zone):
     result = "RETRY"
 else:
     print("instance {0} is destroyed".format(instanceName))

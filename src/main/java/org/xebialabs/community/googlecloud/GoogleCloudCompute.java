@@ -12,7 +12,6 @@ package org.xebialabs.community.googlecloud;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.auth.oauth2.OAuth2Utils;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -50,7 +49,6 @@ public class GoogleCloudCompute {
     private final Credential credential;
     private final Compute compute;
     private final String project;
-
 
     public GoogleCloudCompute(final String client_email, String private_key, final String projectId) throws IOException, GeneralSecurityException {
 

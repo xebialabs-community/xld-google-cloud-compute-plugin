@@ -8,7 +8,6 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-from org.jclouds.googlecomputeengine.domain import JCloudGoogleCompute
 
 import json
 
@@ -18,10 +17,12 @@ print(input_data)
 j = json.loads(input_data)
 private_key = j['private_key'].replace('\\n', '\n')
 client_email = j['client_email']
+project_id = j['project_id']
 print('update %s' %thisCi.id)
 ci = repositoryService.read(thisCi.id)
 ci.privateKey = private_key
 ci.clientEmail = client_email
+ci.projectId = project_id
 repositoryService.update([ci])
 
 
