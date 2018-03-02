@@ -47,8 +47,8 @@ public class JCloudGoogleComputeTest {
         Map<String, String> metadata = Maps.newHashMap();
         metadata.put("startup-script-url", "gs://ci-scripts/start-vm.sh");
         {
-            //GoogleCloudCompute googleCompute = new GoogleCloudCompute(client_email, private_key);
-            GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
+            GoogleCloudCompute googleCompute = new GoogleCloudCompute(client_email, private_key, project);
+            //GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
             selfLinkCreate = googleCompute.createInstance(instanceName, imageName, "ubuntu-os-cloud", machine, zone, externalAddress, metadata);
         }
         {

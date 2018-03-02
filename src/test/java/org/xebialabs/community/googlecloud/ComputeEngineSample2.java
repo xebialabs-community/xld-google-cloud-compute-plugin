@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Jonathan Simon
  */
-public class ComputeEngineSample {
+public class ComputeEngineSample2 {
 
     /**
      * Be sure to specify the name of your application. If the application name is {@code null} or
@@ -120,7 +120,7 @@ public class ComputeEngineSample {
                     new FileInputStream(json_file_path)));
 
             //clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(
-            //    ComputeEngineSample.class.getResourceAsStream("/client_secrets.json")));
+            //    ComputeEngineSample2.class.getResourceAsStream("/client_secrets.json")));
             if (clientSecrets.getDetails().getClientId().startsWith("Enter")
                 || clientSecrets.getDetails().getClientSecret().startsWith("Enter ")) {
                 System.out.println("Enter Client ID and Secret from https://code.google.com/apis/console/ "

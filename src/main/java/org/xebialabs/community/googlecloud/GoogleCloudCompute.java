@@ -12,10 +12,13 @@ package org.xebialabs.community.googlecloud;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.auth.oauth2.OAuth2Utils;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.PemReader;
+import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.*;
@@ -24,7 +27,14 @@ import com.google.common.collect.Lists;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.*;
 
 import static com.google.common.collect.Iterables.getFirst;
@@ -33,31 +43,32 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 public class GoogleCloudCompute {
 
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    private static final java.io.File DATA_STORE_DIR =
-        new java.io.File(System.getProperty("user.home"), ".store/compute_engine_sample");
-
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE);
-
     private static final String APPLICATION_NAME = "XebiaLabs/1.0";
 
 
-    /**
-     * Set the time out limit for operation calls to the Compute Engine API.
-     */
-    private static final long OPERATION_TIMEOUT_MILLIS = 120 * 1000;
-
     private final HttpTransport httpTransport;
-
     private final Credential credential;
     private final Compute compute;
     private final String project;
 
 
     public GoogleCloudCompute(final String client_email, String private_key, final String projectId) throws IOException, GeneralSecurityException {
-        this.credential = null;
+
         this.httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
-        // Create compute engine object for listing instances
+        PrivateKey privateKey = privateKeyFromPkcs8(private_key);
+        GoogleCredential.Builder credentialBuilder = new GoogleCredential.Builder()
+            .setTransport(httpTransport)
+            .setJsonFactory(JSON_FACTORY)
+            .setServiceAccountId(client_email)
+            .setServiceAccountScopes(Collections.emptyList())
+            .setServiceAccountPrivateKey(privateKey)
+            .setServiceAccountProjectId(projectId);
+
+        this.credential = credentialBuilder.build().createScoped(SCOPES);
+        //.setServiceAccountPrivateKeyId(privateKeyId);
+
         this.compute = new Compute.Builder(
             httpTransport, JSON_FACTORY, null)
             .setApplicationName(APPLICATION_NAME)
@@ -68,9 +79,9 @@ public class GoogleCloudCompute {
     }
 
     public GoogleCloudCompute(final String json_file_path, final String projectId) throws IOException, GeneralSecurityException {
-        this.httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
         this.credential = GoogleCredential.fromStream(new FileInputStream(json_file_path)).createScoped(SCOPES);
+        this.httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         this.compute = new Compute.Builder(
             httpTransport, JSON_FACTORY, null)
             .setApplicationName(APPLICATION_NAME)
@@ -230,7 +241,7 @@ public class GoogleCloudCompute {
 
     public void waitForOperation(String selfLink, String zone) throws Exception {
         System.out.println("Waiting for operation completion...");
-        Operation.Error error = blockUntilComplete(selfLink, zone, OPERATION_TIMEOUT_MILLIS);
+        Operation.Error error = blockUntilComplete(selfLink, zone, 120 * 1000);
         if (error == null) {
             System.out.println("Success!");
         } else {
@@ -308,6 +319,27 @@ public class GoogleCloudCompute {
     }
 
     public boolean isOperationDone(String opId, String zone) throws IOException {
-        return getOperation(opId,zone).getStatus().equals("DONE");
+        return getOperation(opId, zone).getStatus().equals("DONE");
+    }
+
+    private static PrivateKey privateKeyFromPkcs8(String privateKeyPem) throws IOException {
+        Reader reader = new StringReader(privateKeyPem);
+        PemReader.Section section = PemReader.readFirstSectionAndClose(reader, "PRIVATE KEY");
+        if (section == null) {
+            throw new IOException("Invalid PKCS8 data.");
+        }
+        byte[] bytes = section.getBase64DecodedBytes();
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
+        Exception unexpectedException = null;
+        try {
+            KeyFactory keyFactory = SecurityUtils.getRsaKeyFactory();
+            PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
+            return privateKey;
+        } catch (NoSuchAlgorithmException exception) {
+            unexpectedException = exception;
+        } catch (InvalidKeySpecException exception) {
+            unexpectedException = exception;
+        }
+        throw new RuntimeException("Unexpected exception reading PKCS data", unexpectedException);
     }
 }
