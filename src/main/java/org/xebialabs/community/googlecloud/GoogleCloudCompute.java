@@ -335,4 +335,26 @@ public class GoogleCloudCompute {
         }
         throw new RuntimeException("Unexpected exception reading PKCS data", unexpectedException);
     }
+
+    public List<String> getInstanceNames() throws IOException {
+        Compute.Instances.AggregatedList request = this.compute.instances().aggregatedList(project);
+
+        InstanceAggregatedList response = request.execute();
+        if (response.getItems() == null) {
+            return Collections.emptyList();
+        }
+
+        List<String> instanceNames = Lists.newArrayList();
+        for (Map.Entry<String, InstancesScopedList> stringInstancesScopedListEntry : response.getItems().entrySet()) {
+            List<Instance> instances = stringInstancesScopedListEntry.getValue().getInstances();
+            if (instances == null)
+                continue;
+            for (Instance instance : instances) {
+                instanceNames.add(instance.getName());
+            }
+
+        }
+        return instanceNames;
+
+    }
 }

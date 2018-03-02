@@ -14,4 +14,9 @@ print("Check Connection on '%s'" % thisCi.name)
 print("Using %s client email" % thisCi.clientEmail)
 
 googleCompute = GoogleCloudCompute(thisCi.clientEmail, thisCi.privateKey, thisCi.projectId);
+print("____instances____")
+names = googleCompute.getInstanceNames()
+print("--")
+for name in names:
+    print(name)
 print("-done-")

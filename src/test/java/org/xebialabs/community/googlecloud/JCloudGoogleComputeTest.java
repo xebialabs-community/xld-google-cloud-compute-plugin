@@ -32,7 +32,7 @@ public class JCloudGoogleComputeTest {
         String project = "just-terminus-194507";
         String zone = "europe-west1-b";
 
-        String instanceName = "instance-5";
+        String instanceName = "instance-7";
         String imageName = "ubuntu-1710";
         String selfLinkCreate = "";
 
@@ -69,6 +69,11 @@ public class JCloudGoogleComputeTest {
             System.out.println("id = " + id);
             System.out.println("natIP = " + natIP);
             System.out.println("status = " + status);
+
+            System.out.println("--- Instances --");
+            System.out.println(googleCompute.getInstanceNames());
+            System.out.println("--- /Instances --");
+
         }
         {
             GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
