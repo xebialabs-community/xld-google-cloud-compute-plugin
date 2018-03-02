@@ -46,7 +46,6 @@ public class GoogleCloudCompute {
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE);
     private static final String APPLICATION_NAME = "XebiaLabs/1.0";
 
-
     private final HttpTransport httpTransport;
     private final Credential credential;
     private final Compute compute;
@@ -65,9 +64,9 @@ public class GoogleCloudCompute {
             .setServiceAccountScopes(Collections.emptyList())
             .setServiceAccountPrivateKey(privateKey)
             .setServiceAccountProjectId(projectId);
+        //.setServiceAccountPrivateKeyId(privateKeyId);
 
         this.credential = credentialBuilder.build().createScoped(SCOPES);
-        //.setServiceAccountPrivateKeyId(privateKeyId);
 
         this.compute = new Compute.Builder(
             httpTransport, JSON_FACTORY, null)
@@ -75,11 +74,9 @@ public class GoogleCloudCompute {
             .setHttpRequestInitializer(credential)
             .build();
         this.project = projectId;
-        System.out.printf("Successfully Authenticated to " + project + " project");
     }
 
     public GoogleCloudCompute(final String json_file_path, final String projectId) throws IOException, GeneralSecurityException {
-
         this.credential = GoogleCredential.fromStream(new FileInputStream(json_file_path)).createScoped(SCOPES);
         this.httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         this.compute = new Compute.Builder(
@@ -87,9 +84,7 @@ public class GoogleCloudCompute {
             .setApplicationName(APPLICATION_NAME)
             .setHttpRequestInitializer(credential)
             .build();
-
         this.project = projectId;
-        System.out.println("Successfully Authenticated to " + project + " project");
     }
 
 
