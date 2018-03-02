@@ -10,12 +10,14 @@
 package org.xebialabs.community.googlecloud;
 
 
+import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.jclouds.googlecomputeengine.domain.Instance;
 import org.jclouds.googlecomputeengine.domain.JCloudGoogleCompute;
+import sun.awt.windows.ThemeReader;
 
 import java.io.File;
 import java.util.Map;
@@ -32,7 +34,7 @@ public class JCloudGoogleComputeTest {
         String project = "just-terminus-194507";
         String zone = "europe-west1-b";
 
-        String instanceName = "instance-4";
+        String instanceName = "instance-5";
         String imageName = "ubuntu-1710";
         String selfLinkCreate = "";
 
@@ -48,16 +50,16 @@ public class JCloudGoogleComputeTest {
         metadata.put("startup-script-url", "gs://ci-scripts/start-vm.sh");
         {
             //GoogleCloudCompute googleCompute = new GoogleCloudCompute(client_email, private_key);
-            GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path);
+            GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
             selfLinkCreate = googleCompute.createInstance(instanceName, imageName, "ubuntu-os-cloud", machine, zone, externalAddress, metadata);
         }
         {
-            GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path);
+            GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
             googleCompute.waitForOperation(selfLinkCreate, zone);
             System.out.println("Created " + instanceName);
         }
         {
-            GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path);
+            GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
             com.google.api.services.compute.model.Instance instance = googleCompute.getInstanceByName(instanceName, zone);
             System.out.println("instance = " + instance);
 
@@ -69,10 +71,23 @@ public class JCloudGoogleComputeTest {
             System.out.println("status = " + status);
         }
         {
-            GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path);
+            GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
             String selfLinkDelete = googleCompute.deleteInstance(instanceName, zone);
-            googleCompute.waitForOperation(selfLinkDelete, zone);
+            long start = System.currentTimeMillis();
+            while (!googleCompute.isOperationDone(selfLinkDelete, zone)) {
+                Thread.sleep(1000 * 5);
+                System.out.println("waiting...");
+                //Operation operation = googleCompute.getOperation(selfLinkDelete, zone);
+                //System.out.println("operation = " + operation);
+            }
+            long stop = System.currentTimeMillis();
             System.out.println("Deleted " + instanceName);
+            long delta = (stop - start) / 1000;
+            System.out.println("delta = " + delta);
+            Operation operation = googleCompute.getOperation(selfLinkDelete, zone);
+            System.out.println("operation.getInsertTime() = " + operation.getInsertTime());
+            System.out.println("operation.getStartTime() = " + operation.getStartTime());
+            System.out.println("operation.getEndTime() = " + operation.getEndTime());
         }
         System.out.println(" DONE !");
     }

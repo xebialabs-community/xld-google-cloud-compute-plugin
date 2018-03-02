@@ -16,10 +16,10 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.*;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 import java.io.FileInputStream;
@@ -40,18 +40,12 @@ public class GoogleCloudCompute {
 
     private static final String APPLICATION_NAME = "XebiaLabs/1.0";
 
-    /**
-     * Set the Network configuration values of the sample VM instance to be created.
-     */
-    private static final String NETWORK_INTERFACE_CONFIG = "ONE_TO_ONE_NAT";
-    private static final String NETWORK_ACCESS_CONFIG = "External NAT";
 
     /**
      * Set the time out limit for operation calls to the Compute Engine API.
      */
-    private static final long OPERATION_TIMEOUT_MILLIS = 60 * 1000;
+    private static final long OPERATION_TIMEOUT_MILLIS = 120 * 1000;
 
-    private final FileDataStoreFactory dataStoreFactory;
     private final HttpTransport httpTransport;
 
     private final Credential credential;
@@ -59,28 +53,31 @@ public class GoogleCloudCompute {
     private final String project;
 
 
-    public GoogleCloudCompute(final String client_email, String private_key) throws IOException, GeneralSecurityException {
+    public GoogleCloudCompute(final String client_email, String private_key, final String projectId) throws IOException, GeneralSecurityException {
         this.credential = null;
         this.httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        this.dataStoreFactory = new FileDataStoreFactory(DATA_STORE_DIR);
+
         // Create compute engine object for listing instances
         this.compute = new Compute.Builder(
-            httpTransport, JSON_FACTORY, null).setApplicationName(APPLICATION_NAME)
-            .setHttpRequestInitializer(credential).build();
-        this.project = "XXX";
+            httpTransport, JSON_FACTORY, null)
+            .setApplicationName(APPLICATION_NAME)
+            .setHttpRequestInitializer(credential)
+            .build();
+        this.project = projectId;
         System.out.printf("Successfully Authenticated to " + project + " project");
     }
 
-    public GoogleCloudCompute(final String json_file_path) throws IOException, GeneralSecurityException {
+    public GoogleCloudCompute(final String json_file_path, final String projectId) throws IOException, GeneralSecurityException {
         this.httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        this.dataStoreFactory = new FileDataStoreFactory(DATA_STORE_DIR);
+
         this.credential = GoogleCredential.fromStream(new FileInputStream(json_file_path)).createScoped(SCOPES);
         this.compute = new Compute.Builder(
-            httpTransport, JSON_FACTORY, null).setApplicationName(APPLICATION_NAME)
-            .setHttpRequestInitializer(credential).build();
+            httpTransport, JSON_FACTORY, null)
+            .setApplicationName(APPLICATION_NAME)
+            .setHttpRequestInitializer(credential)
+            .build();
 
-        this.project = "just-terminus-194507";
-
+        this.project = projectId;
         System.out.println("Successfully Authenticated to " + project + " project");
     }
 
@@ -105,11 +102,17 @@ public class GoogleCloudCompute {
         ifc.setNetwork(network.getSelfLink());
         List<AccessConfig> configs = new ArrayList<>();
         AccessConfig config = new AccessConfig();
-        config.setType(NETWORK_INTERFACE_CONFIG);
-        config.setName(NETWORK_ACCESS_CONFIG);
+        config.setType("ONE_TO_ONE_NAT");
+        config.setName("External NAT");
+        if (!Strings.isNullOrEmpty(externalAddress)) {
+            String address = this.compute.addresses().get(project, getRegion(zone), externalAddress).execute().getAddress();
+            System.out.println(externalAddress + "-> Set address = " + address);
+            config.setNatIP(address);
+        }
         configs.add(config);
         ifc.setAccessConfigs(configs);
         instance.setNetworkInterfaces(Collections.singletonList(ifc));
+
 
         // Add attached Persistent Disk to be used by VM Instance.
         AttachedDisk disk = new AttachedDisk();
@@ -155,6 +158,27 @@ public class GoogleCloudCompute {
 
         Operation execute = insert.execute();
         return execute.getName();
+    }
+
+    private String getRegion(String zone) throws IOException {
+
+        Compute.Regions.List request = this.compute.regions().list(project);
+        RegionList response;
+        do {
+            response = request.execute();
+            if (response.getItems() == null) {
+                continue;
+            }
+
+            for (Region region : response.getItems()) {
+                if (zone.startsWith(region.getName())) {
+                    return region.getName();
+                }
+            }
+            request.setPageToken(response.getNextPageToken());
+        } while (response.getNextPageToken() != null);
+
+        throw new RuntimeException("No region found for zone" + zone);
     }
 
     private List<Image> searchImage(String imageName, String imageProject) throws IOException {
@@ -250,7 +274,7 @@ public class GoogleCloudCompute {
         throws Exception {
         long start = System.currentTimeMillis();
         Compute.ZoneOperations.Get init = compute.zoneOperations().get(project, zone, opId);
-        Operation operation = init.execute();
+        Operation operation = getOperation(opId, zone);
 
 
         final long POLL_INTERVAL = 5 * 1000;
@@ -276,5 +300,14 @@ public class GoogleCloudCompute {
             }
         }
         return operation == null ? null : operation.getError();
+    }
+
+    public Operation getOperation(String opId, String zone) throws IOException {
+        Compute.ZoneOperations.Get init = compute.zoneOperations().get(project, zone, opId);
+        return init.execute();
+    }
+
+    public boolean isOperationDone(String opId, String zone) throws IOException {
+        return getOperation(opId,zone).getStatus().equals("DONE");
     }
 }
