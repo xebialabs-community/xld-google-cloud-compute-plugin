@@ -1,10 +1,10 @@
 /**
  * Copyright 2018 XEBIALABS
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package org.xebialabs.community.googlecloud;
@@ -28,6 +28,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -156,12 +158,26 @@ public class GoogleCloudCompute {
         meta.setItems(items);
         instance.setMetadata(meta);
 
+
         System.out.println(instance.toPrettyString());
 
         Compute.Instances.Insert insert = compute.instances().insert(project, zone, instance);
 
         Operation execute = insert.execute();
         return execute.getName();
+    }
+
+    public String createInstancesFromTemplate(String groupName, String templateName, String zone, int targetSize) throws IOException {
+        Compute.InstanceTemplates.Get request = this.compute.instanceTemplates().get(project, templateName);
+        InstanceTemplate response = request.execute();
+        InstanceGroupManager instanceGroupManager = new InstanceGroupManager()
+            .setName(groupName)
+            .setInstanceTemplate(response.getSelfLink())
+            .setTargetSize(targetSize);
+
+        Operation operation = this.compute.instanceGroupManagers().insert(project, zone, instanceGroupManager).execute();
+
+        return operation.getName();
     }
 
     private String getRegion(String zone) throws IOException {
@@ -243,7 +259,7 @@ public class GoogleCloudCompute {
 
     }
 
-    public com.google.api.services.compute.model.Instance getInstanceByName(String instanceName, String zone) throws IOException {
+    public Instance getInstanceByName(String instanceName, String zone) throws IOException {
 
         Compute.Instances.List instances = compute.instances().list(project, zone);
         InstanceList list = instances.execute();
@@ -253,10 +269,40 @@ public class GoogleCloudCompute {
             for (com.google.api.services.compute.model.Instance instance : list.getItems()) {
                 if (instance.getName().equals(instanceName))
                     return instance;
-
             }
         }
         throw new RuntimeException("Instance " + instanceName + " not found in " + zone + " zone");
+    }
+
+    public InstanceGroup getInstanceByGroupName(String groupName, String zone) throws IOException {
+
+        Compute.InstanceGroups.List instances = compute.instanceGroups().list(project, zone);
+        InstanceGroupList list = instances.execute();
+        if (list.getItems() == null) {
+            throw new RuntimeException("Group " + groupName + " not found in " + zone + " zone");
+        } else {
+            for (InstanceGroup instance : list.getItems()) {
+                if (instance.getName().equals(groupName))
+                    return instance;
+            }
+        }
+        throw new RuntimeException("Group " + groupName + " not found in " + zone + " zone");
+    }
+
+
+    public List<String> getManagedInstancesSelfLinkByGroupName(String zone, String resourceId) throws IOException {
+
+        Compute.InstanceGroupManagers.ListManagedInstances instances = compute.instanceGroupManagers().listManagedInstances(project, zone, resourceId);
+        InstanceGroupManagersListManagedInstancesResponse list = instances.execute();
+        List<String> managedInstanceSelfLink = Lists.newArrayList();
+        if (list.getManagedInstances() == null) {
+            throw new RuntimeException("No Instance running in Group " + resourceId + " in " + zone + " zone");
+        } else {
+            for (ManagedInstance instance : list.getManagedInstances()) {
+                managedInstanceSelfLink.add(instance.getInstance());
+            }
+        }
+        return managedInstanceSelfLink;
     }
 
     public String deleteInstance(String instanceName, String zone) throws IOException {
@@ -355,5 +401,14 @@ public class GoogleCloudCompute {
         }
         return instanceNames;
 
+    }
+
+    public Instance getInstanceBySelfLink(String selfLink) throws URISyntaxException, IOException {
+        SelfLink sl = new SelfLink(selfLink);
+        return this.getInstanceByName(sl.getName(), sl.getZone());
+    }
+
+    public String deleteInstanceFromGroup(String groupName, String zone) throws IOException {
+        return compute.instanceGroupManagers().delete(project, zone, groupName).execute().getName();
     }
 }

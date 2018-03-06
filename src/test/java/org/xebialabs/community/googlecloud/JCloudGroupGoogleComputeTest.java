@@ -10,6 +10,8 @@
 package org.xebialabs.community.googlecloud;
 
 
+import com.google.api.services.compute.model.Instance;
+import com.google.api.services.compute.model.InstanceGroup;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
@@ -18,22 +20,24 @@ import com.google.gson.JsonParser;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Charsets.UTF_8;
 
-public class JCloudGoogleComputeTest {
+public class JCloudGroupGoogleComputeTest {
     public static void main(String args[]) throws Exception {
-        //String json_file_path = "/Users/bmoussaud/.ssh/MyFirstProject-3606a89398e9.json";
+
         String json_file_path = "/Users/bmoussaud/.ssh/MyFirstProject--468c2c49e42d.json";
-        //String json_file_path_2 = "/Users/bmoussaud/.ssh/gcloud.json";
 
         String machine = "n1-standard-1";
         String project = "just-terminus-194507";
         String zone = "europe-west1-b";
 
-        String instanceName = "instance-8";
+        //String instanceName = "instance-8";
         String imageName = "ubuntu-1710";
+        String templateName = "instance-template-1";
+        String groupName = "my-xl-group-3";
         String selfLinkCreate = "";
 
         String fileContents = Files.toString(new File(json_file_path), UTF_8);
@@ -48,27 +52,31 @@ public class JCloudGoogleComputeTest {
         metadata.put("startup-script-url", "gs://ci-scripts/start-vm.sh");
         {
             GoogleCloudCompute googleCompute = new GoogleCloudCompute(client_email, private_key, project);
-            //GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
-            selfLinkCreate = googleCompute.createInstance(instanceName, imageName, "ubuntu-os-cloud", machine, zone, externalAddress, metadata);
+            selfLinkCreate = googleCompute.createInstancesFromTemplate(groupName, templateName, zone, 2);
+
         }
         {
             GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
             //googleCompute.waitForOperation(selfLinkCreate, zone);
             System.out.println("Wait for Create....");
-            waitFor(zone, instanceName, googleCompute, selfLinkCreate);
-            System.out.println("Created " + instanceName);
+            waitFor(zone, groupName, googleCompute, selfLinkCreate);
+            System.out.println("Created " + groupName);
         }
         {
             GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
-            com.google.api.services.compute.model.Instance instance = googleCompute.getInstanceByName(instanceName, zone);
-            System.out.println("instance = " + instance);
-
-            String natIP = instance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP();
-            String id = instance.getSelfLink().toString();
-            String status = instance.getStatus();
-            System.out.println("id = " + id);
-            System.out.println("natIP = " + natIP);
-            System.out.println("status = " + status);
+            InstanceGroup instanceGroup = googleCompute.getInstanceByGroupName(groupName, zone);
+            System.out.println("instanceGroup = " + instanceGroup);
+            List<String> managedInstancesByGroupName = googleCompute.getManagedInstancesSelfLinkByGroupName(zone, instanceGroup.getName());
+            for (String s : managedInstancesByGroupName) {
+                System.out.println("s = " + s);
+                Instance instance = googleCompute.getInstanceBySelfLink(s);
+                String natIP = instance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP();
+                String id = instance.getSelfLink().toString();
+                String status = instance.getStatus();
+                System.out.println("id = " + id);
+                System.out.println("natIP = " + natIP);
+                System.out.println("status = " + status);
+            }
 
             System.out.println("--- Instances --");
             System.out.println(googleCompute.getInstanceNames());
@@ -77,9 +85,9 @@ public class JCloudGoogleComputeTest {
         }
         {
             GoogleCloudCompute googleCompute = new GoogleCloudCompute(json_file_path, project);
-            String selfLinkDelete = googleCompute.deleteInstance(instanceName, zone);
+            String selfLinkDelete = googleCompute.deleteInstanceFromGroup(groupName, zone);
             System.out.println("Wait for Delete....");
-            waitFor(zone, instanceName, googleCompute, selfLinkDelete);
+            waitFor(zone, groupName, googleCompute, selfLinkDelete);
         }
         System.out.println(" DONE !");
     }
