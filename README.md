@@ -46,9 +46,9 @@ The plugin is a XL Deploy plugin that adds capability for provision instance int
 
 ## Deployables ##
 
-The plugin supports one deployable:
+The plugin supports 2 deployables:
 
-1. Create an provisioning package `udm.ProvisioningPackage` with `googlecloud.compute.InstanceSpec` as deployables. 
+1. Create an provisioning package `udm.ProvisioningPackage` with `googlecloud.compute.InstanceSpec`  or  `googlecloud.compute.TemplateSpec` as deployables. 
 2. Add templates https://docs.xebialabs.com/xl-deploy/how-to/use-provisioning-outputs.html
-3   . Start deploying.
+3. Start deploying.
 
