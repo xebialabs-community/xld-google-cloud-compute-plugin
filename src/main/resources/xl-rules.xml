@@ -11,18 +11,72 @@
 
 -->
 <rules xmlns="http://www.xebialabs.com/xl-deploy/xl-rules">
-    <rule name="community.gcp.compute.CREATE" scope="deployed">
-        <conditions>
-            <type>googlecloud.compute.Instance</type>
-            <operation>CREATE</operation>
-        </conditions>
-        <planning-script-path>google/cloud/compute/instance/planningScripts/steps_for_create.py</planning-script-path>
-    </rule>
-    <rule name="community.gcp.compute.DESTROY" scope="deployed">
-        <conditions>
-            <type>googlecloud.compute.Instance</type>
-            <operation>DESTROY</operation>
-        </conditions>
-        <planning-script-path>google/cloud/compute/instance/planningScripts/steps_for_destroy.py</planning-script-path>
-    </rule>
+  <rule name="community.gcp.compute.instance.CREATE" scope="deployed">
+    <conditions>
+      <type>googlecloud.compute.Instance</type>
+      <operation>CREATE</operation>
+    </conditions>
+    <planning-script-path>google/cloud/compute/instance/planningScripts/steps_for_create.py</planning-script-path>
+  </rule>
+  <rule name="community.gcp.compute.instance.DESTROY" scope="deployed">
+    <conditions>
+      <type>googlecloud.compute.Instance</type>
+      <operation>DESTROY</operation>
+    </conditions>
+    <planning-script-path>google/cloud/compute/instance/planningScripts/steps_for_destroy.py</planning-script-path>
+  </rule>
+
+  <rule name="community.gcp.compute.template.CREATE" scope="deployed">
+    <conditions>
+      <type>googlecloud.compute.Template</type>
+      <operation>CREATE</operation>
+    </conditions>
+    <steps>
+      <jython>
+        <order>80</order>
+        <description expression="true">"Create instance template {0} on {1}".format(deployed.name, deployed.container.name)</description>
+        <script-path>google/cloud/compute/instance/compute_create_template.py</script-path>
+      </jython>
+      <checkpoint/>
+      <jython>
+        <order>81</order>
+        <description expression="true">"Wait for instance template {0} to be running".format(deployed.name)</description>
+        <script-path>google/cloud/compute/instance/compute_create_running_template.py</script-path>
+      </jython>
+      <wait>
+        <order>82</order>
+        <description expression="true">"Wait for the ssh connection is available on {0}".format(deployed.name)</description>
+        <seconds expression="true">deployed.waitOnCreate</seconds>
+      </wait>
+    </steps>
+  </rule>
+
+
+  <rule name="community.gcp.compute.template.DESTROY" scope="deployed">
+    <conditions>
+      <type>googlecloud.compute.Template</type>
+      <operation>DESTROY</operation>
+    </conditions>
+    <steps>
+      <jython>
+        <order>16</order>
+        <description expression="true">"Destroy instance template {0} on {1}".format(previousDeployed.name, previousDeployed.container.name)</description>
+        <script-path>google/cloud/compute/instance/compute_destroy_template.py</script-path>
+      </jython>
+      <checkpoint/>
+      <jython>
+        <order>17</order>
+        <description expression="true">"Wait for instance template {0} to be destroyed".format(previousDeployed.name)</description>
+        <script-path>google/cloud/compute/instance/compute_destroy_running_template.py</script-path>
+      </jython>
+      <wait>
+        <order>18</order>
+        <description expression="true">"Wait for instance template {0} to be fully destroyed (2)".format(previousDeployed.name)</description>
+        <seconds expression="true">previousDeployed.waitOnDestroy</seconds>
+      </wait>
+    </steps>
+
+  </rule>
+
+
 </rules>
