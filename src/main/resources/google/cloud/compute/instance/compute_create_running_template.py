@@ -13,19 +13,26 @@ from org.xebialabs.community.googlecloud import GoogleCloudCompute
 
 def get_instance(google_compute, instance_name, wait_for_running=True):
     local_instance = google_compute.getInstanceBySelfLink(instance_name)
-    local_status = local_instance.getStatus()
-    print("Status {0}".format(local_status))
-    if wait_for_running:
-        if "RUNNING" == local_status:
-            print("Running !")
-            return local_instance
+    if local_instance:
+        local_status = local_instance.getStatus()
+        print("Status {0}".format(local_status))
+        if wait_for_running:
+            if "RUNNING" == local_status:
+                print("Running !")
+                return local_instance
+            else:
+                print("Wait for {0} running".format(instance_name))
+                time.sleep(5)
+                return get_instance(google_compute, instance_name, True)
         else:
-            print("Wait for {0} running".format(instance_name))
+            return local_instance
+    else:
+        if wait_for_running:
+            print("Wait for {0} appearing".format(instance_name))
             time.sleep(5)
             return get_instance(google_compute, instance_name, True)
-    else:
-        return local_instance
-
+        else:
+            raise Exception("Instance {0} not found".format(instance_name))
 
 googleCompute = GoogleCloudCompute(deployed.container.clientEmail, deployed.container.privateKey,
                                    deployed.container.projectId)

@@ -264,14 +264,14 @@ public class GoogleCloudCompute {
         Compute.Instances.List instances = compute.instances().list(project, zone);
         InstanceList list = instances.execute();
         if (list.getItems() == null) {
-            throw new RuntimeException("Instance " + instanceName + " not found in " + zone + " zone");
+            return null;
         } else {
             for (com.google.api.services.compute.model.Instance instance : list.getItems()) {
                 if (instance.getName().equals(instanceName))
                     return instance;
             }
         }
-        throw new RuntimeException("Instance " + instanceName + " not found in " + zone + " zone");
+        return null;
     }
 
     public InstanceGroup getInstanceByGroupName(String groupName, String zone) throws IOException {
