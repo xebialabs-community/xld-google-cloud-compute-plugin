@@ -48,7 +48,10 @@ else:
         status = instance.getStatus()
         deployed.instanceName = instance.getName()
         deployed.instanceId = str(instance.getSelfLink())
-        deployed.publicIp = instance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP()
+        deployed.privateIp = instance.getNetworkInterfaces().get(0).getNetworkIP()
+        if instance.getNetworkInterfaces().get(0).getAccessConfigs():
+            deployed.publicIp = instance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP()
         print("instance Name is {0}".format(deployed.instanceName))
+        print("private  IP   is {0}".format(deployed.privateIp))
         print("public   IP   is {0}".format(deployed.publicIp))
         print("Instance ID   is {0}".format(deployed.instanceId))

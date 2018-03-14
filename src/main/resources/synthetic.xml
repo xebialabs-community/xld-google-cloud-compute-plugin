@@ -59,6 +59,7 @@
 
         <property name="operationSelfLink" kind="string" required="false" category="Output"/>
         <property name="instanceId" kind="string" required="false" category="Output"/>
+        <property name="privateIp" kind="string" required="false" category="Output"/>
         <property name="publicIp" kind="string" required="false" category="Output"/>
     </type>
 
@@ -81,6 +82,7 @@
         <property name="instanceName" kind="string" description="Name of instance." required="false" category="Output"/>
         <property name="operationSelfLink" kind="string" required="false" category="Output"/>
         <property name="instanceId" kind="string" required="false" category="Output"/>
+        <property name="privateIp" kind="string" required="false" category="Output"/>
         <property name="publicIp" kind="string" required="false" category="Output"/>
     </type>
 </synthetic>
