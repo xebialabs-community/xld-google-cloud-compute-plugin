@@ -15,9 +15,6 @@ apply plugin: 'maven'
 repositories {
   mavenLocal()
   mavenCentral()
-  maven {
-    url 'https://dist.xebialabs.com/public/maven2'
-  }
 }
 
 dependencies {
@@ -33,17 +30,12 @@ dependencies {
 }
 
 
-version = "1.0.5-SNAPSHOT"
-
-// sourceCompatibility = 1.7
-// targetCompatibility = 1.7
-
 xlDocker {
-  compileImage = 'xebialabs/xlr_dev_compile'
-  compileVersion = 'v7.2.0.2'
-  runImage = 'xebialabs/xlr_dev_run'
-  runVersion = 'v7.2.0.1'
-  runPortMapping = '15516:5516'
+  compileImage = 'xebialabsunsupported/xld_dev_compile'
+  compileVersion = '8.2.0'
+  runImage = 'xebialabsunsupported/xld_dev_run'
+  runVersion = '8.2.0'
+  runPortMapping = '14516:4516'
 }
 
 if (!project.hasProperty('release.scope')) {

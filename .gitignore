@@ -1,14 +1,17 @@
 xl-deploy-7.6.0-server
 build
 out
+.classpath
 .gradle
 .idea
-*.iml
+.project
+.settings/
+xld-google-cloud-compute-plugin.iml
 *.ipr
 *.iws
 
-.gradle
 /build/
+bin/
 temp
 supervisord.*
 
