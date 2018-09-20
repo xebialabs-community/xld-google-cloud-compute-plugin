@@ -6,7 +6,7 @@ out
 .idea
 .project
 .settings/
-*.iml
+xld-google-cloud-compute-plugin.iml
 *.ipr
 *.iws
 
