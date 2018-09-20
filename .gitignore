@@ -1,14 +1,17 @@
 xl-deploy-7.6.0-server
 build
 out
+.classpath
 .gradle
 .idea
+.project
+.settings/
 *.iml
 *.ipr
 *.iws
 
-.gradle
 /build/
+bin/
 temp
 supervisord.*
 
