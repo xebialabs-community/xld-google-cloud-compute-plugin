@@ -4,6 +4,9 @@
 SWITCHES="--info --stacktrace"
 
 GRADLE_VERSION=$(./gradlew -version | grep Gradle | cut -d ' ' -f 2)
+echo "TRAVIS TAG $TRAVIS_TAG"
+echo "TRAVIS PR  $TRAVIS_PULL_REQUEST"
+echo "TRAVIS BRANCH  $TRAVIS_BRANCH"
 
 if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ "$GRADLE_PUBLISH" == "false" ]; then
   echo -e "Build Pull Request #$TRAVIS_PULL_REQUEST => Branch [$TRAVIS_BRANCH]"
