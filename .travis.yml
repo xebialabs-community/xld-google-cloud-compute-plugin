@@ -1,12 +1,9 @@
 language: java
 script: "./buildViaTravis.sh"
-jdk:
-- oraclejdk8
 deploy:
   provider: releases
   api_key:
     secure: O5nIup+xmg3EwsGMByR7+Lwsh1JJD0Y8TAU3BW4eSIdmBQqRhhbayTL4n2mqN3JRBFXDGVhKyoUpff6Uq2rw/H4i5TCdPT8ARVY2UASmMeZgo5E49Mst8HgbCnu7Eq+PNJaBk8dH5urWEimbswmjotEepGiSdv63Qhn3injWUdSkijEZbM60lhqBF8hsfHwSjoDgRca/EGfslUBXDk5HqH/GkPl8VoWFwhvUt8vXHtSlRg1UAIZKOyTyEzktX4PI3COcA5Ckxpk9y3qmERCUlI+Bsfd6VIVWIZROcDwB5Xtb/y4QD+DFel18uNaSXiV5tit6MR7VeIFwOrBqjUj+bAKWbAoZ5Y1gm2PHsOVc2oHDQEt8GId2REwLFR0cKDjqq2xUyRKwc3tI6uKjc/7yP/bZjsk8Ji6SRQiKrRKjrwTqvOrHn49vb1TExuPjhpcSk+eokE53/tn4Isw2iCFJNnw0ozLh3Bpz8z1lpEjaQMhBj3EWbuq+2cE8KvmiGHI5h8jWF0DSnkTVet8Kd/CUWMc3xl7n1fNHlTaXkT0HFzxGOA6Z3YhhHTX3JzKZQVkXv488grVgiNd9CAViAFzjPswTNZbwFlyqs51K1DzA1zNr6Puap2Pw5L57MC0LnVjgLRPMS2psQZTko2jaCAFQBdr4Q/2t9Gl7jhPxHISRMJY=
-  file_glob: true
   file_glob: true
   file: build/distributions/*
   skip_cleanup: true
