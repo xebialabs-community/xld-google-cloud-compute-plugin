@@ -15,6 +15,8 @@
 [xld-google-cloud-compute-plugin-license-url]: https://opensource.org/licenses/MIT
 [xld-google-cloud-compute-plugin-downloads-image]: https://img.shields.io/github/downloads/xebialabs-community/xld-google-cloud-compute-plugin/total.svg
 
+XLD Google cloud compute plugin is deprecated now as the plugin is insourced to Digital.ai organization. The plugin is available on https://github.com/xebialabs/xld-google-cloud-compute-plugin
+
 ![Google Compute](images/gcc.png)
 
 ## Preface
